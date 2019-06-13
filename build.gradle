@@ -24,15 +24,14 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation('com.jayway.jsonpath:json-path')
+    compile("org.springframework.boot:spring-boot-starter-web")
+
+    // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Use MySQL Connector-J
     compile 'mysql:mysql-connector-java'
-    // https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa
-    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '2.1.8.RELEASE'
-    // https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api
-    compile group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
-    // https://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager
-    compile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.3.Final'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
