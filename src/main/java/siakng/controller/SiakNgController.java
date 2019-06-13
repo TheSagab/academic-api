@@ -24,7 +24,7 @@ public class SiakNgController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public Course getCourse(@PathVariable String id) {
-        return siakNgService.getCourse(Integer.parseInt(id));
+        return siakNgService.getCourse(Long.parseLong(id));
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -38,7 +38,7 @@ public class SiakNgController {
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public Course deleteCourse(@PathVariable String id) {
-        int courseId = Integer.parseInt(id);
+        Long courseId = Long.parseLong(id);
         return siakNgService.deleteCourse(courseId);
     }
 

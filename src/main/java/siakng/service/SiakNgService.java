@@ -5,14 +5,17 @@ import org.springframework.stereotype.Service;
 import siakng.repository.SiakNgRepository;
 import siakng.model.Course;
 
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 @Service
 public class SiakNgService {
 
     private static final int MAX_SKS = 24;
-    private static final Date DATE_LIMIT = new Date(1561856400000L);
+    private static final Date DATE_LIMIT = new GregorianCalendar(2019, Calendar.JUNE, 30).getTime();
 
     @Autowired
     SiakNgRepository siakNgRepository;
@@ -38,11 +41,11 @@ public class SiakNgService {
         return siakNgRepository.findAll();
     }
 
-    public Course getCourse(int id){
+    public Course getCourse(Long id){
         return siakNgRepository.getOne(id);
     }
 
-    public Course deleteCourse(int id){
+    public Course deleteCourse(Long id){
         Course course = getCourse(id);
         siakNgRepository.delete(course);
         return course;

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import siakng.model.Course;
 
 @Repository
-public interface SiakNgRepository extends JpaRepository<Course, Integer>{
+public interface SiakNgRepository extends JpaRepository<Course, Long>{
 
 }

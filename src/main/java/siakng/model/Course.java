@@ -4,18 +4,21 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-public class Course {
+public class Course implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
 
     private String name;
     private int sks;
     private Date dateCreated;
+
+    public Course() { }
 
     public Course(String name, int sks) {
         this.name = name;
@@ -23,18 +26,18 @@ public class Course {
         this.dateCreated = new Date();
     }
 
-    public Course(int id, String name, int sks) {
+    public Course(Long id, String name, int sks) {
         this.id = id;
         this.name = name;
         this.sks = sks;
         this.dateCreated = new Date();
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -56,5 +59,9 @@ public class Course {
 
     public Date getDateCreated() {
         return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }
