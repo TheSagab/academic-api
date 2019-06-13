@@ -10,9 +10,12 @@ import siakng.model.Course;
 import siakng.repository.SiakNgRepository;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SiakNgServiceTest {
 
@@ -24,7 +27,7 @@ public class SiakNgServiceTest {
 
     @Before
     public void setUp() {
-
+        initMocks(this);
     }
 
     @Test(expected = RuntimeException.class)
@@ -45,14 +48,16 @@ public class SiakNgServiceTest {
 
     @Test(expected = RuntimeException.class)
     public void addCourse_WhenDateLimitExceeded_ReturnsException() {
-
+        Course c1 = new Course(1L, "Statprob", 3);
+        c1.setDateCreated(new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime());
+        Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
+        Course result = siakNgService.addCourse(c1);
 
     }
 
     @Test
     public void addCourse_Success() {
-        Course c1 = new Course(1, "Statprob", 3);
-        System.out.println(siakNgRepository);
+        Course c1 = new Course(1L, "Statprob", 3);
         Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
         Course result = siakNgService.addCourse(c1);
         Assert.assertEquals(c1.getId(), result.getId());
@@ -60,8 +65,8 @@ public class SiakNgServiceTest {
 
     @Test
     public void getCourses() {
-        Course c1 = new Course(1, "Statprob", 3);
-        Course c2 = new Course(2, "Anum", 3);
+        Course c1 = new Course(1L, "Statprob", 3);
+        Course c2 = new Course(2L, "Anum", 3);
         List<Course> courseList = new ArrayList<>();
         courseList.add(c1);
         courseList.add(c2);
@@ -74,25 +79,24 @@ public class SiakNgServiceTest {
 
     @Test
     public void getCourse() {
-        Course c1 = new Course(1, "Statprob", 3);
+        Course c1 = new Course(1L, "Statprob", 3);
 
         Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
         siakNgService.addCourse(c1);
 
-        Mockito.when(siakNgRepository.getOne(1)).thenReturn(c1);
-        Course result = siakNgService.getCourse(1);
+        Mockito.when(siakNgRepository.getOne(1L)).thenReturn(c1);
+        Course result = siakNgService.getCourse(1L);
         Assert.assertEquals(c1.getId(), result.getId());
     }
 
     @Test
     public void deleteCourse() {
-        Course c1 = new Course(1, "Statprob", 3);
+        Course c1 = new Course(1L, "Statprob", 3);
 
         Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
         siakNgService.addCourse(c1);
 
-        //Mockito.when(siakNgRepository.delete(c1)).thenReturn();
-        Course result = siakNgService.deleteCourse(1);
-        Assert.assertEquals(c1.getId(), result.getId());
+        Course result = siakNgService.deleteCourse(1L);
+        verify(siakNgRepository, times(1)).delete(result);
     }
 }
