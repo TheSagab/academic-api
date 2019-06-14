@@ -66,7 +66,6 @@ public class SiakNgServiceTest {
         Course result = siakNgService.addCourse(c1);
         Assert.assertEquals(c1.getId(), result.getId());
         verify(siakNgRepository, times(1)).save(c1);
-        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test
@@ -80,9 +79,7 @@ public class SiakNgServiceTest {
         List<Course> result = siakNgService.getCourses();
         for (int i = 0; i < result.size(); i++) {
             Assert.assertEquals(courseList.get(i).getId(), result.get(i).getId());
-            verify(siakNgRepository, times(1)).save(courseList.get(i));
         }
-        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test
@@ -96,7 +93,6 @@ public class SiakNgServiceTest {
         Course result = siakNgService.getCourse(1L);
         Assert.assertEquals(c1.getId(), result.getId());
         verify(siakNgRepository, times(1)).getOne(1L);
-        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test
