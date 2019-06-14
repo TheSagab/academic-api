@@ -40,10 +40,12 @@ public class SiakNgServiceTest {
             courseList.add(c);
             when(siakNgRepository.save(c)).thenReturn(c);
             siakNgService.addCourse(c);
+            verify(siakNgRepository, times(1)).save(c);
         }
         when(siakNgRepository.findAll()).thenReturn(courseList);
 
         siakNgService.addCourse(new Course("Course Pembuat Error", 6));
+        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test(expected = RuntimeException.class)
@@ -52,6 +54,8 @@ public class SiakNgServiceTest {
         c1.setDateCreated(new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime());
         Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
         Course result = siakNgService.addCourse(c1);
+        verify(siakNgRepository, times(0)).save(c1);
+        verifyNoMoreInteractions(siakNgRepository);
 
     }
 
@@ -61,6 +65,8 @@ public class SiakNgServiceTest {
         Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
         Course result = siakNgService.addCourse(c1);
         Assert.assertEquals(c1.getId(), result.getId());
+        verify(siakNgRepository, times(1)).save(c1);
+        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test
@@ -74,11 +80,13 @@ public class SiakNgServiceTest {
         List<Course> result = siakNgService.getCourses();
         for (int i = 0; i < result.size(); i++) {
             Assert.assertEquals(courseList.get(i).getId(), result.get(i).getId());
+            verify(siakNgRepository, times(1)).save(courseList.get(i));
         }
+        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test
-    public void getCourse() {
+    public void getCourse_Success() {
         Course c1 = new Course(1L, "Statprob", 3);
 
         Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
@@ -87,15 +95,31 @@ public class SiakNgServiceTest {
         Mockito.when(siakNgRepository.getOne(1L)).thenReturn(c1);
         Course result = siakNgService.getCourse(1L);
         Assert.assertEquals(c1.getId(), result.getId());
+        verify(siakNgRepository, times(1)).getOne(1L);
+        verifyNoMoreInteractions(siakNgRepository);
     }
 
     @Test
-    public void deleteCourse() {
+    public void getCourse_WhenCourseIsNotFound_ReturnsNull() {
+        Mockito.when(siakNgRepository.getOne(1L)).thenReturn(null);
+        Course result = siakNgService.getCourse(1L);
+        Assert.assertNull(result);
+        verify(siakNgRepository, times(1)).getOne(1L);
+        verifyNoMoreInteractions(siakNgRepository);
+    }
+
+    @Test
+    public void deleteCourse_Success() {
         Course c1 = new Course(1L, "Statprob", 3);
 
-        Mockito.when(siakNgRepository.save(c1)).thenReturn(c1);
-        siakNgService.addCourse(c1);
+        Mockito.when(siakNgRepository.getOne(1L)).thenReturn(c1);
+        Course result = siakNgService.deleteCourse(1L);
+        verify(siakNgRepository, times(1)).delete(result);
+    }
 
+    @Test
+    public void deleteCourse_WhenCourseIsNotFound_ReturnsNull() {
+        Mockito.when(siakNgRepository.getOne(1L)).thenReturn(null);
         Course result = siakNgService.deleteCourse(1L);
         verify(siakNgRepository, times(1)).delete(result);
     }
