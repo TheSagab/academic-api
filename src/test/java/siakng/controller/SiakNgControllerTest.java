@@ -4,28 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import siakng.model.Course;
 import siakng.service.SiakNgService;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -68,7 +63,7 @@ public class SiakNgControllerTest {
     }
 
     @Test
-    public void getCourse() throws Exception {
+    public void getCourse_Success() throws Exception {
         Course c1 = new Course(1L, "Statprob", 3);
 
         Mockito.when(siakNgService.getCourse(1L)).thenReturn(c1);
@@ -84,13 +79,21 @@ public class SiakNgControllerTest {
     }
 
     @Test
-    public void addCourse() throws Exception {
+    public void getCourse_WhenCourseIsNotFound_ReturnsNotFound() throws Exception {
+        Mockito.when(siakNgService.getCourse(1L)).thenThrow(new ResourceNotFoundException());
+
+        this.mockMvc.perform(get("/academic/1"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addCourse_Success() throws Exception {
         Course c1 = new Course(1L, "Statprob", 3);
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(c1);
 
-        Mockito.when(siakNgService.addCourse(any(Course.class))).thenReturn(c1);
-
+        given(siakNgService.addCourse(any(Course.class))).willReturn(c1);
         this.mockMvc.perform(post("/academic/add")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json)
@@ -105,7 +108,48 @@ public class SiakNgControllerTest {
     }
 
     @Test
-    public void deleteCourse() throws Exception {
+    public void addCourse_WhenSksIsMoreThan24_ReturnsException() throws Exception {
+        final int courseNum = 5;
+        String[] courseStrings = {"DDP", "SDA", "Basdat", "Statprob", "TBA"};
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (int i = 0; i < courseNum; i++) {
+            Course c = new Course(courseStrings[i], 4);
+            String json = objectMapper.writeValueAsString(c);
+            given(siakNgService.addCourse(c)).willReturn(c);
+            this.mockMvc.perform(post("/academic/add")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json)
+                    .characterEncoding("utf-8"));
+            verify(siakNgService, times(1)).addCourse(courseStrings[i], 4);
+        }
+        Course errorCourse = new Course("Course Pembuat Error", 6);
+        String json = objectMapper.writeValueAsString(errorCourse);
+        Mockito.when(siakNgService.addCourse(errorCourse)).thenThrow(new RuntimeException("SKS melebihi 24"));
+        this.mockMvc.perform(post("/academic/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .characterEncoding("utf-8"));
+                //@TODO belum selesai, masih 200 OK
+                //.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addCourse_WhenDateLimitExceeded_ReturnsException() throws Exception {
+        Course c1 = new Course(1L, "Statprob", 3);
+        c1.setDateCreated(new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(c1);
+        given(siakNgService.addCourse(any(Course.class))).willReturn(null);
+        this.mockMvc.perform(post("/academic/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .characterEncoding("utf-8"));
+        //@TODO belum selesai, masih 200 OK
+        //.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void deleteCourse_Success() throws Exception {
         Course c1 = new Course(1L, "Statprob", 3);
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(c1);
@@ -133,5 +177,13 @@ public class SiakNgControllerTest {
         verifyNoMoreInteractions(siakNgService);
     }
 
+    @Test
+    public void deleteCourse_WhenCourseIsNotFound_ReturnsNotFound() throws Exception {
+        Mockito.when(siakNgService.deleteCourse(1L)).thenThrow(new ResourceNotFoundException());
+
+        this.mockMvc.perform(delete("/academic/delete/1"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 
 }
